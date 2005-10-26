@@ -1,9 +1,0 @@
-<bin file=digiAnal.cpp>
-<flags CXXFLAGS=-I/afs/cern.ch/user/t/tumanov/scratch0/>
-<flags CXXFLAGS=-I/afs/cern.ch/user/t/tumanov/scratch0/TriDAS/emu/emuDAQ/GenericRUI/include>
-<use name=EventFilter/CSCRawToDigi>
-<use name=DataFormats/CSCDigi>
-<lib name=DDUReadout>
-</bin> 
-
-
