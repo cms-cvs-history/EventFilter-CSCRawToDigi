@@ -28,7 +28,7 @@ int deepAnal(const CSCEventData & data, int & nalct, int & nclct, int & ncfeb, i
   return 0;  
 }
 
-int printStats(int k, int NreadEvents, int dmb, int nalct, int nclct, int ncfeb, int nrpc) {
+void printStats(int k, int NreadEvents, int dmb, int nalct, int nclct, int ncfeb, int nrpc) {
   std::cout << "Fraction of chambers in dmb " << k << " = " << (float)dmb/NreadEvents << std::endl;
   std::cout << "   nalct = " <<(float) nalct/NreadEvents << std::endl;
   std::cout << "   nclct = " <<(float) nclct/NreadEvents << std::endl;
@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
   int errorsDetected = 0;
   int reportedChambers =0;
   int unpackedChambers = 0;
-  string datafile=argv[1];
+  std::string datafile=argv[1];
   int NreadEvents=0;
   if (argv[2]) maxEvents = (int) atof(argv[2]);
   FileReaderDDU ddu;
@@ -70,15 +70,15 @@ int main(int argc, char **argv) {
   for (int i = 0; ddu.readNextEvent() && (i < maxEvents); ++i){
     
     if (i>-1) {
-    if (ddu.errorFlag) {std::cout << "error flag = " << hex 
-			     << ddu.errorFlag << dec <<
+    if (ddu.errorFlag) {std::cout << "error flag = " << std::hex 
+			     << ddu.errorFlag << std::dec <<
 			  std::endl; errorsDetected++; }  
     
     CSCDDUEventData dduEvent((short unsigned int *)ddu.data());
     std::cout << "checking dduEvent " << dduEvent.check() << std::endl;
     if (ddu.errorStat) {
-      std::cout << "error stat = " << hex 
-	   << ddu.errorStat << dec << std::endl;
+      std::cout << "error stat = " << std::hex 
+	   << ddu.errorStat << std::dec << std::endl;
       dduEvent.decodeStatus(ddu.errorStat);
     }
     const std::vector<CSCEventData> & cscData = dduEvent.cscData();  
@@ -93,15 +93,15 @@ int main(int argc, char **argv) {
     
 
     int dmb_dav = dduEvent.header().dmb_dav();     
-    std::cout << "dmbdav = " << hex << dmb_dav << dec << std::endl;
+    std::cout << "dmbdav = " << std::hex << dmb_dav << std::dec << std::endl;
   
     //dduConnect |= dmb_dav;    
     //std::cout << "dduConnect = " << hex << dduConnect << dec << std::endl;
    
     int dmb_full = dduEvent.trailer().dmb_full();     
-    std::cout << "dmbfull = " << hex << dmb_full << dec << std::endl;
+    std::cout << "dmbfull = " << std::hex << dmb_full << std::dec << std::endl;
     int dmb_warn = dduEvent.trailer().dmb_warn();     
-    std::cout << "dmbwarn = " << hex << dmb_warn << dec << std::endl;
+    std::cout << "dmbwarn = " << std::hex << dmb_warn << std::dec << std::endl;
   
   
     for (int j = 0; j<maxCham+1; j++) {
