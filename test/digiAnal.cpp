@@ -1,4 +1,4 @@
-#include "TriDAS/emu/emuDAQ/DDUReadout/include/FileReaderDDU.h"
+#include "IORawData/CSCCommissioning/src/FileReaderDDU.h"
 #include "EventFilter/CSCRawToDigi/interface/CSCDDUEventData.h"
 #include "DataFormats/CSCDigi/interface/CSCStripDigi.h"
 #include "EventFilter/CSCRawToDigi/interface/CSCEventData.h"
@@ -51,7 +51,6 @@ int main(int argc, char **argv) {
   //CSCCLCTData::setDebug(true); 
   //CSCEventData::setDebug(true);  
   //CSCTMBData::setDebug(true);
-  //DDUReader::setDebug(true);
   //CSCDDUEventData::setDebug(true);
 
   int maxEvents = 500000;
@@ -64,7 +63,7 @@ int main(int argc, char **argv) {
   int NreadEvents=0;
   if (argv[2]) maxEvents = (int) atof(argv[2]);
   FileReaderDDU ddu;
-  ddu.openFile(datafile);
+  ddu.open(datafile.c_str());
   int const maxCham = 6;
   int nch[maxCham+1] = {0};
   int dmb[maxCham]   = {0};
@@ -73,21 +72,15 @@ int main(int argc, char **argv) {
   int nclct[maxCham] = {0};
   int ncfeb[maxCham] = {0};
   int nrpc[maxCham]  = {0};
+  const unsigned short *dduBuf=0;
 
-  for (int i = 0; ddu.readNextEvent() && (i < maxEvents); ++i){
-    
-    if (i>-1) {
-    if (ddu.errorFlag) {std::cout << "error flag = " << std::hex 
-			     << ddu.errorFlag << std::dec <<
-			  std::endl; errorsDetected++; }  
-    
-    CSCDDUEventData dduEvent((short unsigned int *)ddu.data());
+  for (int i = 0; i < maxEvents; ++i){
+    ddu.next(dduBuf);    
+    unsigned short * buf = dduBuf;
+ 
+    CSCDDUEventData dduEvent(buf);
     std::cout << "checking dduEvent " << dduEvent.check() << std::endl;
-    if (ddu.errorStat) {
-      std::cout << "error stat = " << std::hex 
-	   << ddu.errorStat << std::dec << std::endl;
-      dduEvent.decodeStatus(ddu.errorStat);
-    }
+
     const std::vector<CSCEventData> & cscData = dduEvent.cscData();  
     reportedChambers += dduEvent.header().ncsc();
     unpackedChambers += cscData.size();
@@ -140,7 +133,6 @@ int main(int argc, char **argv) {
     NreadEvents = i+1;
     std::cout << "***************** End of event " << i+1 << std::endl;
     
-  }
   
   std::cout << "Number of chambers reported by DDU during run = " << reportedChambers << std::endl;
   std::cout << "Number of chambers unpacked during run = " << unpackedChambers << std::endl;
@@ -153,7 +145,5 @@ int main(int argc, char **argv) {
   for (int k=0; k<maxCham; k++) {
     printStats(k, NreadEvents, dmb[k], nalct[k], nclct[k], ncfeb[k], nrpc[k]);
   }
-
-  ddu.closeFile();
 
 }
