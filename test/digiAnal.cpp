@@ -41,6 +41,7 @@ int printStats(int k, int NreadEvents, int dmb, int nalct, int nclct, int ncfeb,
   std::cout << "   nclct = " <<(float) nclct/NreadEvents << std::endl;
   std::cout << "   ncfeb = " <<(float) ncfeb/NreadEvents << std::endl;
   std::cout << "   nprc  = " <<(float) nrpc/NreadEvents << std::endl << std::endl;
+  return 0;
 }
 
 int main(int argc, char **argv) {
@@ -54,7 +55,7 @@ int main(int argc, char **argv) {
   //CSCDDUEventData::setDebug(true);
 
   int maxEvents = 500000;
-  int dduConnect = 0;
+  //int dduConnect = 0;
   int mismatch = 0;
   int errorsDetected = 0;
   int reportedChambers =0;
@@ -67,7 +68,7 @@ int main(int argc, char **argv) {
   int const maxCham = 6;
   int nch[maxCham+1] = {0};
   int dmb[maxCham]   = {0};
-  unsigned dmbID[maxCham]   = {0};
+  //unsigned dmbID[maxCham]   = {0};
   int nalct[maxCham] = {0};
   int nclct[maxCham] = {0};
   int ncfeb[maxCham] = {0};
@@ -76,7 +77,7 @@ int main(int argc, char **argv) {
 
   for (int i = 0; i < maxEvents; ++i){
     ddu.next(dduBuf);    
-    unsigned short * buf = dduBuf;
+    unsigned short * buf = (unsigned short *) dduBuf;
  
     CSCDDUEventData dduEvent(buf);
     std::cout << "checking dduEvent " << dduEvent.check() << std::endl;
@@ -110,7 +111,7 @@ int main(int argc, char **argv) {
     
     int g=0;
     
-    int DDUmask = 0x3223; // 0011 0010 0010 0011
+    //int DDUmask = 0x3223; // 0011 0010 0010 0011
     bool dmbCondition[maxCham] = 
      {dmb_dav&0x1, dmb_dav&0x2, dmb_dav&0x20, dmb_dav&0x200, 
       dmb_dav&0x1000, dmb_dav&0x2000};
@@ -129,11 +130,11 @@ int main(int argc, char **argv) {
       }
     }
 
-    }
+  
     NreadEvents = i+1;
     std::cout << "***************** End of event " << i+1 << std::endl;
     
-  
+  }
   std::cout << "Number of chambers reported by DDU during run = " << reportedChambers << std::endl;
   std::cout << "Number of chambers unpacked during run = " << unpackedChambers << std::endl;
   std::cout << "Number of read events during run = " << NreadEvents << std::endl;
