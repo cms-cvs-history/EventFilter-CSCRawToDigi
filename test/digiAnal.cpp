@@ -29,7 +29,7 @@ int deepAnal(const CSCEventData & data, int & nalct, int & nclct, int & ncfeb, i
   for (int ilayer = 1; ilayer <= 6; ilayer++) { 
     std::vector <CSCStripDigi> digis =  data.stripDigis(ilayer);
     for (int i=0; i<digis.size() ; i++) {
-      std::cout << "digis" << i << std::endl; 
+      //std::cout << "digis" << i << std::endl; 
     }
   }
   return 0;  
