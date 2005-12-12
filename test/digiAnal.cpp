@@ -12,6 +12,9 @@
 
 
 int deepAnal(const CSCEventData & data, int & nalct, int & nclct, int & ncfeb, int & nrpc) {
+   
+  std::cout <<"For Martin DMB ID  = "<< data.dmbHeader().dmbID() << std::endl;
+  
   if (data.nclct()){ 
     //std::cout << "NCLCT = " << data.nclct() << std::endl;
     nclct++;
@@ -47,12 +50,12 @@ int printStats(int k, int NreadEvents, int dmb, int nalct, int nclct, int ncfeb,
 int main(int argc, char **argv) {
    
   
-  //CSCAnodeData::setDebug(true);
-  //CSCALCTHeader::setDebug(true);
-  //CSCCLCTData::setDebug(true); 
-  //CSCEventData::setDebug(true);  
-  //CSCTMBData::setDebug(true);
-  //CSCDDUEventData::setDebug(true);
+  CSCAnodeData::setDebug(true);
+  CSCALCTHeader::setDebug(true);
+  CSCCLCTData::setDebug(true); 
+  CSCEventData::setDebug(true);  
+  CSCTMBData::setDebug(true);
+  CSCDDUEventData::setDebug(true);
 
   int maxEvents = 500000;
   //int dduConnect = 0;
@@ -76,7 +79,12 @@ int main(int argc, char **argv) {
   const unsigned short *dduBuf=0;
 
   for (int i = 0; i < maxEvents; ++i){
-    ddu.next(dduBuf);    
+    try {
+      ddu.next(dduBuf);    
+    } catch (std::runtime_error err ){
+      std::cout <<"digi Anal:: " << err.what()<<"  end of file?" << std::endl;
+      break;
+    }
     unsigned short * buf = (unsigned short *) dduBuf;
  
     CSCDDUEventData dduEvent(buf);
@@ -121,7 +129,7 @@ int main(int argc, char **argv) {
     //  {dmb_dav&0x1, dmb_dav&0x2, dmb_dav&0x20, dmb_dav&0x800, dmb_dav&0x4000};
   
 
-    for (int k=0; k<maxCham; k++) {
+    /*for (int k=0; k<maxCham; k++) {
       if (dmbCondition[k]){
         //dmbID[k]=cscData[g].dmbHeader.dmbID();
 	deepAnal(cscData[g], nalct[k], nclct[k], ncfeb[k], nrpc[k]);
@@ -129,6 +137,11 @@ int main(int argc, char **argv) {
 	g++;
       }
     }
+    */
+    for (int k=0; k<cscData.size(); ++k) {
+      deepAnal(cscData[k], nalct[k], nclct[k], ncfeb[k], nrpc[k]);
+    }
+
 
   
     NreadEvents = i+1;
