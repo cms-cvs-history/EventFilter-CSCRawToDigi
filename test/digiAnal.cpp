@@ -77,10 +77,11 @@ int main(int argc, char **argv) {
   int ncfeb[maxCham] = {0};
   int nrpc[maxCham]  = {0};
   const unsigned short *dduBuf=0;
+  int length = 1;
 
-  for (int i = 0; i < maxEvents; ++i){
+  for (int i = 0; (i < maxEvents)&&(length); ++i){
     try {
-      ddu.next(dduBuf);    
+      length= ddu.next(dduBuf);    
     } catch (std::runtime_error err ){
       std::cout <<"digi Anal:: " << err.what()<<"  end of file?" << std::endl;
       break;
