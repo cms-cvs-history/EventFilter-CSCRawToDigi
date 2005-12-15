@@ -50,12 +50,12 @@ int printStats(int k, int NreadEvents, int dmb, int nalct, int nclct, int ncfeb,
 int main(int argc, char **argv) {
    
   
-  CSCAnodeData::setDebug(true);
-  CSCALCTHeader::setDebug(true);
-  CSCCLCTData::setDebug(true); 
-  CSCEventData::setDebug(true);  
-  CSCTMBData::setDebug(true);
-  CSCDDUEventData::setDebug(true);
+  //CSCAnodeData::setDebug(true);
+  //CSCALCTHeader::setDebug(true);
+  //CSCCLCTData::setDebug(true); 
+  //CSCEventData::setDebug(true);  
+  //CSCTMBData::setDebug(true);
+  //CSCDDUEventData::setDebug(true);
 
   int maxEvents = 500000;
   //int dduConnect = 0;
