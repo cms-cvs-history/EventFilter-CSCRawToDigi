@@ -31,7 +31,7 @@ int deepAnal(const CSCEventData & data, int & nalct, int & nclct, int & ncfeb, i
       (data.cfebData(4))) ncfeb++;
   for (int ilayer = 1; ilayer <= 6; ilayer++) { 
     std::vector <CSCStripDigi> digis =  data.stripDigis(ilayer);
-    for (int i=0; i<digis.size() ; i++) {
+    for (unsigned int i=0; i<digis.size() ; i++) {
       //std::cout << "digis" << i << std::endl; 
     }
   }
@@ -118,12 +118,12 @@ int main(int argc, char **argv) {
       if (NChambers==j) nch[j]++;
     }
     
-    int g=0;
+    //int g=0;
     
     //int DDUmask = 0x3223; // 0011 0010 0010 0011
-    bool dmbCondition[maxCham] = 
-     {dmb_dav&0x1, dmb_dav&0x2, dmb_dav&0x20, dmb_dav&0x200, 
-      dmb_dav&0x1000, dmb_dav&0x2000};
+    //bool dmbCondition[maxCham] = 
+    // {dmb_dav&0x1, dmb_dav&0x2, dmb_dav&0x20, dmb_dav&0x200, 
+    //  dmb_dav&0x1000, dmb_dav&0x2000};
   
     //int DDUmask = 0x4800; // 0100 1000 0000 0000
     //bool dmbCondition[maxCham] = 
@@ -139,7 +139,7 @@ int main(int argc, char **argv) {
       }
     }
     */
-    for (int k=0; k<cscData.size(); ++k) {
+    for (unsigned int k=0; k<cscData.size(); ++k) {
       deepAnal(cscData[k], nalct[k], nclct[k], ncfeb[k], nrpc[k]);
     }
 
