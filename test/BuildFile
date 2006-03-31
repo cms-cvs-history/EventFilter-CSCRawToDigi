@@ -4,6 +4,7 @@
 <use name=EventFilter/CSCRawToDigi>
 <use name=DataFormats/CSCDigi>
 <use name=IORawData/CSCCommissioning>
+<use name=FWCore/MessageService>
 </bin> 
 
 

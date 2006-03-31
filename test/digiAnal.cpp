@@ -8,6 +8,7 @@
 #include "EventFilter/CSCRawToDigi/interface/CSCTMBData.h"
 #include "EventFilter/CSCRawToDigi/interface/CSCDDUTrailer.h"
 #include "EventFilter/CSCRawToDigi/interface/CSCDMBHeader.h"
+#include "FWCore/MessageService/interface/MessageServicePresence.h"
 #include <iostream>
 
 
@@ -50,6 +51,7 @@ int printStats(int k, int NreadEvents, int dmb, int nalct, int nclct, int ncfeb,
 int main(int argc, char **argv) {
    
   
+  edm::service::MessageServicePresence my_message_service;
   //CSCAnodeData::setDebug(true);
   //CSCALCTHeader::setDebug(true);
   //CSCCLCTData::setDebug(true); 
