@@ -3,7 +3,7 @@
 #<flags CXXFLAGS=-I/afs/cern.ch/user/t/tumanov/work/TriDAS/emu/emuDAQ/GenericRUI/include>
 <use name=EventFilter/CSCRawToDigi>
 <use name=DataFormats/CSCDigi>
-<use name=IORawData/CSCCommissioning>
+#<use name=IORawData/CSCCommissioning>
 <use name=FWCore/MessageService>
 </bin> 
 

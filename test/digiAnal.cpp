@@ -1,4 +1,4 @@
-#include "IORawData/CSCCommissioning/src/FileReaderDDU.h"
+#include "IORawData/CSCCommissioning/src/FileReaderDDU.cc"
 #include "EventFilter/CSCRawToDigi/interface/CSCDDUEventData.h"
 #include "DataFormats/CSCDigi/interface/CSCStripDigi.h"
 #include "EventFilter/CSCRawToDigi/interface/CSCEventData.h"
