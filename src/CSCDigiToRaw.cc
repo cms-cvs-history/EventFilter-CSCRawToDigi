@@ -1,7 +1,7 @@
 /** \file
  *
- *  $Date: 2006/11/21 21:21:00 $
- *  $Revision: 1.6 $
+ *  $Date: 2006/11/22 23:05:51 $
+ *  $Revision: 1.7 $
  *  \author A. Tumanov - Rice
  */
 
@@ -129,6 +129,7 @@ void CSCDigiToRaw::createFedBuffers(const CSCStripDigiCollection& stripDigis,
     for(map<CSCDetId, CSCEventData>::iterator chamberItr = chamberDataMap.begin();
 	chamberItr != chamberDataMap.end(); ++chamberItr)  {
       int indexDCC = mapping.dccId(chamberItr->first);
+      std::cout <<"indexDCC="<<indexDCC<<"  idcc="<<idcc<<std::endl;
       if (idcc==indexDCC) { ///fill the right dcc 
 	dccEvent.dduData()[indexDDU].add(chamberItr->second);
 	boost::dynamic_bitset<> dccBits = dccEvent.pack();
