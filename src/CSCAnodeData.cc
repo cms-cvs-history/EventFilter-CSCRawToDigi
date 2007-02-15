@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string.h> // for bzero
 
-bool CSCAnodeData::debug = true;
+bool CSCAnodeData::debug = false;
 
 CSCAnodeData::CSCAnodeData() 
 : nAFEBs_(0), nTimeBins_(0) {

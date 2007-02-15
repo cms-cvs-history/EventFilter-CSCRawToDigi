@@ -6,7 +6,7 @@
 #include <iomanip>
 #include <bitset>
 
-bool CSCALCTHeader::debug=true;
+bool CSCALCTHeader::debug = false;
 
 
 CSCALCTHeader::CSCALCTHeader(int chamberType) {
