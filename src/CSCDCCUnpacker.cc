@@ -61,6 +61,7 @@ CSCDCCUnpacker::CSCDCCUnpacker(const edm::ParameterSet & pset) :
   examinerMask = pset.getUntrackedParameter<unsigned int>("ExaminerMask",0x7FB7BF6);
   instatiateDQM = pset.getUntrackedParameter<bool>("runDQM", false);
   errorMask = pset.getUntrackedParameter<unsigned int>("ErrorMask",0xDFCFEFFF);
+  inputObjectsTag = pset.getParameter<edm::InputTag>("InputObjects");
 
   if(instatiateDQM){
    monitor = edm::Service<CSCMonitorInterface>().operator->();
@@ -106,7 +107,7 @@ void CSCDCCUnpacker::produce(edm::Event & e, const edm::EventSetup& c){
 
   // Get a handle to the FED data collection
   edm::Handle<FEDRawDataCollection> rawdata;
-  e.getByType(rawdata);
+  e.getByLabel(inputObjectsTag, rawdata);
 
   // create the collection of CSC wire and strip Digis
   std::auto_ptr<CSCWireDigiCollection> wireProduct(new CSCWireDigiCollection);
