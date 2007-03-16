@@ -1,0 +1,15 @@
+# This is a generic cfi file for CSC Digi to Raw packing
+# tumanov@rice.edu 3/16/07
+
+
+
+
+module packer = CSCDigiToRawModule {
+			# this file serves as a primitive configuration database
+                        # providing mapping between hardware and software Ids
+			FileInPath theMappingFile = "CondFormats/CSCObjects/data/csc_slice_test_map.txt"
+	
+			# this is a label for digi input (to be replaced by InputTag in 140 and up)	
+			untracked string DigiCreator = "muonCSCDigis"
+	
+		}

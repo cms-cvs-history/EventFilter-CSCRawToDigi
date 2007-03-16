@@ -1,0 +1,24 @@
+# This is a generic cfi file for CSC unpacking
+# tumanov@rice.edu 3/16/07
+
+module cscunpacker = CSCDCCUnpacker {
+			untracked bool Debug = true
+			untracked bool PrintEventNumber = false
+
+			# this file serves as a primitive configuration database
+			# providing mapping between hardware and software Ids
+			FileInPath theMappingFile = "CondFormats/CSCObjects/data/csc_slice_test_map.txt"
+
+			# Use CSC examiner for corrupt or semi-corrupt data to avoid unpacker crashes
+			untracked bool UseExaminer = false
+
+			# This mask simply reduces error reporting
+			untracked uint32 ErrorMask = 0xDFCFEFFF
+			
+			# This mask is needed by the examiner if it's used
+			untracked uint32 ExaminerMask = 0x7FB7BF6
+			
+			# Define input to the unpacker
+			InputTag InputObjects = packer:CSCRawData
+
+}
