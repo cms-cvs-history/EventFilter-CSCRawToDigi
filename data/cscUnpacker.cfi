@@ -2,7 +2,7 @@
 # tumanov@rice.edu 3/16/07
 
 module cscunpacker = CSCDCCUnpacker {
-			untracked bool Debug = true
+			untracked bool Debug = false
 			untracked bool PrintEventNumber = false
 
 			# this file serves as a primitive configuration database
