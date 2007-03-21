@@ -19,6 +19,6 @@ module cscunpacker = CSCDCCUnpacker {
 			untracked uint32 ExaminerMask = 0x7FB7BF6
 			
 			# Define input to the unpacker
-			InputTag InputObjects = packer:CSCRawData
+			InputTag InputObjects = cscpacker:CSCRawData
 
 }
