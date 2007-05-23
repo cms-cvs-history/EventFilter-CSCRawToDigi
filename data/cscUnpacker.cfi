@@ -22,4 +22,6 @@ module cscunpacker = CSCDCCUnpacker {
 			#InputTag InputObjects = cscpacker:CSCRawData
 			InputTag InputObjects = source
 
+			#this flag disables unpacking of the Status Digis
+			untracked bool UnpackStatusDigis = false
 }
