@@ -24,4 +24,7 @@ module cscunpacker = CSCDCCUnpacker {
 
 			#this flag disables unpacking of the Status Digis
 			untracked bool UnpackStatusDigis = false
+
+		        #set this to true if unpacking MTCC data from summer-fall MTCC2006 
+                        untracked bool isMTCCData = false
 }
