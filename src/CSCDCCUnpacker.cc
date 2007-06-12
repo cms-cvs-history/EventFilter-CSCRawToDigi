@@ -168,14 +168,14 @@ void CSCDCCUnpacker::produce(edm::Event & e, const edm::EventSetup& c)
 	      examiner->output1().hide();
 	      examiner->output2().hide();
 	      const short unsigned int *data = (short unsigned int *)fedData.data();
-	      if( examiner->check(data,long(fedData.size()/2)) != 0 )
+	      if( examiner->check(data,long(fedData.size()/2)) < 0 )
 		{
 		  goodEvent=false;
 		} 
-	      else 
-		{
-		  goodEvent=!(examiner->errors()&examinerMask);
-		}
+	      // else
+	      // {
+	      goodEvent=!(examiner->errors()&examinerMask);
+	      //}
 	    }
 	  
       
@@ -434,6 +434,10 @@ void CSCDCCUnpacker::produce(edm::Event & e, const edm::EventSetup& c)
 	  else 
 	    {
 	      edm::LogError("CSCDCCUnpacker") <<" Examiner deemed the event bad!";
+	      if (examiner) { 
+		edm::LogError("CSCDCCUnpacker") 
+		  << " Examiner errors:0x" << std::hex << examiner->errors() << " mask:0x" << examinerMask;
+	      }
 	      if(instatiateDQM)  monitor->process(examiner, NULL);
 	    }
 	  if (examiner!=NULL) delete examiner;
