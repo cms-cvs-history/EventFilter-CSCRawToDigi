@@ -158,6 +158,8 @@ CSCDCCExaminer::CSCDCCExaminer(void):nERRORS(27),nWARNINGS(5),sERROR(nERRORS),sW
   checkCrcALCT = false; ALCT_CRC=0;
   checkCrcTMB  = false; TMB_CRC=0;
   checkCrcCFEB = false; CFEB_CRC=0;
+  
+  modeDDUonly = false;
 
   //headerDAV_Active = -1; // Trailer vs. Header check // Obsolete since 16.09.05
 

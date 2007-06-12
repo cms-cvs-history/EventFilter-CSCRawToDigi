@@ -171,11 +171,9 @@ void CSCDCCUnpacker::produce(edm::Event & e, const edm::EventSetup& c)
 	      if( examiner->check(data,long(fedData.size()/2)) < 0 )
 		{
 		  goodEvent=false;
-		} 
-	      // else
-	      // {
-	      goodEvent=!(examiner->errors()&examinerMask);
-	      //}
+		} else {
+	          goodEvent=!(examiner->errors()&examinerMask);
+	        }
 	    }
 	  
       
