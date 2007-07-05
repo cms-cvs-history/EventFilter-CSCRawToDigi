@@ -1,7 +1,7 @@
 # This is a generic cfi file for CSC unpacking
 # tumanov@rice.edu 3/16/07
 
-module cscunpacker = CSCDCCUnpacker {
+module muonCSCDigis   = CSCDCCUnpacker {
 			untracked bool Debug = false
 			untracked bool PrintEventNumber = false
 
