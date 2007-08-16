@@ -152,7 +152,7 @@ void CSCDCCUnpacker::produce(edm::Event & e, const edm::EventSetup& c)
 
       /// Take a reference to this FED's data
       const FEDRawData& fedData = rawdata->FEDData(id);
-      unsigned short int length =  fedData.size();
+      unsigned long length =  fedData.size();
 
       if (length)
 	{ ///if fed has data then unpack it
@@ -433,7 +433,7 @@ void CSCDCCUnpacker::produce(edm::Event & e, const edm::EventSetup& c)
 	    }///end of good event
 	  else 
 	    {
-	      edm::LogError("CSCDCCUnpacker") <<" Examiner deemed the event bad!";
+	      edm::LogError("CSCDCCUnpacker") <<"ERROR! Examiner decided to reject the event!";
               if (examiner) {
                 edm::LogError("CSCDCCUnpacker")
                   << " Examiner errors:0x" << std::hex << examiner->errors() << " mask:0x" << examinerMask;
