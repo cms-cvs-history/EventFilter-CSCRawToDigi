@@ -10,13 +10,13 @@ module muonCSCDigis   = CSCDCCUnpacker {
 			FileInPath theMappingFile = "CondFormats/CSCObjects/data/csc_slice_test_map.txt"
 
 			# Use CSC examiner for corrupt or semi-corrupt data to avoid unpacker crashes
-			untracked bool UseExaminer = false
+			untracked bool UseExaminer = true
 
 			# This mask simply reduces error reporting
 			untracked uint32 ErrorMask = 0xDFCFEFFF
 			
 			# This mask is needed by the examiner if it's used
-			untracked uint32 ExaminerMask = 0x7FB7BF6
+			untracked uint32 ExaminerMask = 0x7FB73F6
 			
 			# Define input to the unpacker
 			#InputTag InputObjects = cscpacker:CSCRawData
