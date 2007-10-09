@@ -5,10 +5,6 @@
 
 
 module cscpacker = CSCDigiToRawModule {
-			# this file serves as a primitive configuration database
-                        # providing mapping between hardware and software Ids
-			FileInPath theMappingFile = "CondFormats/CSCObjects/data/csc_slice_test_map.txt"
-	
 			# this is a label for digi input (to be replaced by InputTag in 140 and up)	
 			untracked string DigiCreator = "muonCSCDigis"
 	
