@@ -1,0 +1,19 @@
+// different es_sources are used for different purposes - packing and unpacking
+// this one is for unpacking
+        
+es_source cscUnpackingCabling = PoolDBESSource { 
+					VPSet toGet = {
+             					{
+						string record = "CSCCrateMapRcd"
+                                      		string tag    = "CSCCrateMap"
+						}
+                                    	}
+		
+                	                string timetype = "runnumber"
+                                        string connect = "oracle://orcon/CMS_COND_ON_170_CSC"
+
+                                        PSet DBParameters = {
+                                             untracked string authenticationPath="/afs/cern.ch/user/x/xiezhen/auth/orcongrenreadonly"
+                            		     untracked uint32 authenticationMethod = 1
+                                        }
+                                }
