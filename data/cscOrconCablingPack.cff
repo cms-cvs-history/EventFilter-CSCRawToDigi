@@ -13,7 +13,7 @@ es_source cscPackingCabling = 	PoolDBESSource {
                                         string connect = "oracle://orcon/CMS_COND_ON_170_CSC"
 
                                         PSet DBParameters = {
-                                             untracked string authenticationPath="/afs/cern.ch/user/x/xiezhen/auth/orcongrenreadonly"
+                                             untracked string authenticationPath="/afs/cern.ch/cms/DB/conddb"
                             		     untracked uint32 authenticationMethod = 1
                                         }
 
