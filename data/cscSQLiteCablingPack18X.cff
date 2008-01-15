@@ -1,0 +1,18 @@
+// different es_sources are used for different purposes - packing and unpacking
+// this one is for packing
+        
+es_source cscPackingCabling = 	PoolDBESSource { 
+					VPSet toGet = {
+             					{
+						string record = "CSCChamberMapRcd"
+                                      		string tag    = "CSCChamberMap"
+						}
+                                    	}
+		
+                	                string timetype = "runnumber"
+                                        string connect = "sqlite_fip:CondCore/SQLiteData/data/CSCChamberMapValues_18X.db"
+                                        PSet DBParameters = {
+                                             untracked string authenticationPath="/afs/cern.ch/cms/DB/conddb"
+                            		     untracked uint32 authenticationMethod = 1
+                                        }
+                                }
