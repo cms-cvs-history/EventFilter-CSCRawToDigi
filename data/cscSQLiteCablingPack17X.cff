@@ -10,7 +10,7 @@ es_source cscPackingCabling = 	PoolDBESSource {
                                     	}
 		
                 	                string timetype = "runnumber"
-                                        string connect = "sqlite_fip:CondCore/SQLiteData/data/CSCChamberMapValues_18X.db"
+                                        string connect = "sqlite_fip:CondCore/SQLiteData/data/CSCChamberMapValues.db"
                                         PSet DBParameters = {
                                              untracked string authenticationPath="/afs/cern.ch/cms/DB/conddb"
                             		     untracked uint32 authenticationMethod = 1

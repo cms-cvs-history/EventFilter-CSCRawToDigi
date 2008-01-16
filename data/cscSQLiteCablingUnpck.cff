@@ -10,7 +10,7 @@ es_source cscUnpackingCabling = PoolDBESSource {
                                     	}
 		
                 	                string timetype = "runnumber"
-                                        string connect = "sqlite_fip:CondCore/SQLiteData/data/CSCCrateMapValues.db"
+                                        string connect = "sqlite_fip:CondCore/SQLiteData/data/CSCCrateMapValues_18X.db"
  					
 					
                                         PSet DBParameters = {
