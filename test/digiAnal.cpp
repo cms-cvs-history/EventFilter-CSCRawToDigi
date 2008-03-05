@@ -10,7 +10,7 @@
 
 int deepAnal(const CSCEventData & data, int & nalct, int & nclct, int & ncfeb, int & nrpc) {
    
-  std::cout <<"For Martin DMB ID  = "<< data.dmbHeader().dmbID() << std::endl;
+  std::cout <<"For Martin DMB ID  = "<< data.dmbHeader()->dmbID() << std::endl;
   
   if (data.nclct()){ 
     //std::cout << "NCLCT = " << data.nclct() << std::endl;
