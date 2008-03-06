@@ -12,7 +12,7 @@ module muonCSCDigis   = CSCDCCUnpacker {
 			untracked uint32 ErrorMask = 0xDFCFEFFF
 			
 			# This mask is needed by the examiner if it's used
-			untracked uint32 ExaminerMask = 0x7FB7BF6
+			untracked uint32 ExaminerMask = 0x164BF3F6
 			
 			# Define input to the unpacker
 			#InputTag InputObjects = cscpacker:CSCRawData
