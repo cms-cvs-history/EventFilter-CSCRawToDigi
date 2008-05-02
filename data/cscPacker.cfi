@@ -1,11 +1,8 @@
 # This is a generic cfi file for CSC Digi to Raw packing
 # tumanov@rice.edu 3/16/07
 
-
-
-
 module cscpacker = CSCDigiToRawModule {
-			# this is a label for digi input (to be replaced by InputTag in 140 and up)	
-			untracked string DigiCreator = "muonCSCDigis"
-	
-		}
+  InputTag stripDigiTag = simMuonCSCDigis:MuonCSCStripDigi
+  InputTag wireDigiTag  = simMuonCSCDigis:MuonCSCWireDigi
+}
+
