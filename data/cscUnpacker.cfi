@@ -1,5 +1,4 @@
 # This is a generic cfi file for CSC unpacking
-# tumanov@rice.edu 3/16/07
 
 module muonCSCDigis   = CSCDCCUnpacker {
 			untracked bool Debug = false
@@ -9,10 +8,10 @@ module muonCSCDigis   = CSCDCCUnpacker {
 			untracked bool UseExaminer = true
 
 			# This mask simply reduces error reporting
-			untracked uint32 ErrorMask = 0xDFCFEFFF
+			untracked uint32 ErrorMask = 0x0
 			
 			# This mask is needed by the examiner if it's used
-			untracked uint32 ExaminerMask = 0x164BF3F6
+			untracked uint32 ExaminerMask = 0x1FEBF3F6
 			
 			# Define input to the unpacker
 			#InputTag InputObjects = cscpacker:CSCRawData
