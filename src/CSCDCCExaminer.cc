@@ -40,7 +40,7 @@ void CSCDCCExaminer::modeDDU(bool enable){
 }
 
 
-CSCDCCExaminer::CSCDCCExaminer(void):nERRORS(29),nWARNINGS(5),sERROR(nERRORS),sWARNING(nWARNINGS),sERROR_(nERRORS),sWARNING_(nWARNINGS){
+CSCDCCExaminer::CSCDCCExaminer(unsigned long mask):nERRORS(29),nWARNINGS(5),nPAYLOADS(12),nSTATUSES(23),sERROR(nERRORS),sWARNING(nWARNINGS),sERROR_(nERRORS),sWARNING_(nWARNINGS),sDMBExpectedPayload(nPAYLOADS),sDMBEventStaus(nSTATUSES),examinerMask(mask){
   cout.redirect(std::cout); cerr.redirect(std::cerr);
 
   sERROR[0] = " Any errors                                       ";
@@ -84,8 +84,44 @@ CSCDCCExaminer::CSCDCCExaminer(void):nERRORS(29),nWARNINGS(5),sERROR(nERRORS),sW
   //	sERROR[21] = "DDU Header vs. Trailer mismatch for DAV or Avtive"; // oboslete since 16.09.05
 
   sWARNING[0] = " Extra words between DDU Trailer and DDU Header ";
-  sWARNING[1] = " CFEB B-Words                                   ";
-  sWARNING[2] = " DDU Header Incomplete                          ";
+  sWARNING[1] = " DDU Header Incomplete                          ";
+
+  sDMBExpectedPayload[0]  = "CFEB1_ACTIVE";
+  sDMBExpectedPayload[1]  = "CFEB2_ACTIVE";
+  sDMBExpectedPayload[2]  = "CFEB3_ACTIVE";
+  sDMBExpectedPayload[3]  = "CFEB4_ACTIVE";
+  sDMBExpectedPayload[4]  = "CFEB5_ACTIVE";
+  sDMBExpectedPayload[5]  = "ALCT_DAV";
+  sDMBExpectedPayload[6]  = "TMB_DAV";
+  sDMBExpectedPayload[7]  = "CFEB1_DAV";
+  sDMBExpectedPayload[8]  = "CFEB2_DAV";
+  sDMBExpectedPayload[9]  = "CFEB3_DAV";
+  sDMBExpectedPayload[10] = "CFEB4_DAV";
+  sDMBExpectedPayload[11] = "CFEB5_DAV";
+
+  sDMBEventStaus[0]  = "ALCT_FIFO_FULL";
+  sDMBEventStaus[1]  = "TMB_FIFO_FULL";
+  sDMBEventStaus[2]  = "CFEB1_FIFO_FULL";
+  sDMBEventStaus[3]  = "CFEB2_FIFO_FULL";
+  sDMBEventStaus[4]  = "CFEB3_FIFO_FULL";
+  sDMBEventStaus[5]  = "CFEB4_FIFO_FULL";
+  sDMBEventStaus[6]  = "CFEB5_FIFO_FULL";
+  sDMBEventStaus[7]  = "ALCT_START_TIMEOUT";
+  sDMBEventStaus[8]  = "TMB_START_TIMEOUT";
+  sDMBEventStaus[9]  = "CFEB1_START_TIMEOUT";
+  sDMBEventStaus[10] = "CFEB2_START_TIMEOUT";
+  sDMBEventStaus[11] = "CFEB3_START_TIMEOUT";
+  sDMBEventStaus[12] = "CFEB4_START_TIMEOUT";
+  sDMBEventStaus[13] = "CFEB5_START_TIMEOUT";
+  sDMBEventStaus[14] = "ALCT_END_TIMEOUT";
+  sDMBEventStaus[15] = "TMB_END_TIMEOUT";
+  sDMBEventStaus[16] = "CFEB1_END_TIMEOUT";
+  sDMBEventStaus[17] = "CFEB2_END_TIMEOUT";
+  sDMBEventStaus[18] = "CFEB3_END_TIMEOUT";
+  sDMBEventStaus[19] = "CFEB4_END_TIMEOUT";
+  sDMBEventStaus[20] = "CFEB5_END_TIMEOUT";
+  sDMBEventStaus[21] = "CFEB Active-DAV mismatch";
+  sDMBEventStaus[22] = "B-words found";
 
   sERROR_[0] = " Any errors: 00";
   sERROR_[1] = " DDU Trailer Missing: 01";
@@ -119,8 +155,7 @@ CSCDCCExaminer::CSCDCCExaminer(void):nERRORS(29),nWARNINGS(5),sERROR(nERRORS),sW
   //	sERROR_[21] = "DDU Header vs. Trailer mismatch for DAV or Avtive: 21"; // oboslete since 16.09.05
 
   sWARNING_[0] = " Extra words between DDU Trailer and DDU Header: 00";
-  sWARNING_[1] = " CFEB B-Words: 01";
-  sWARNING_[2] = " DDU Header Incomplete: 02";
+  sWARNING_[1] = " DDU Header Incomplete: 02";
 
   fDCC_Header  = false;
   fDCC_Trailer = false;
@@ -169,6 +204,7 @@ CSCDCCExaminer::CSCDCCExaminer(void):nERRORS(29),nWARNINGS(5),sERROR(nERRORS),sW
 
   modeDDUonly = false;
   sourceID    = 0xFFF;
+  currentChamber = -1;
 
   //headerDAV_Active = -1; // Trailer vs. Header check // Obsolete since 16.09.05
 
@@ -180,6 +216,9 @@ CSCDCCExaminer::CSCDCCExaminer(void):nERRORS(29),nWARNINGS(5),sERROR(nERRORS),sW
 
   bCHAMB_ERR.clear();
   bCHAMB_WRN.clear();
+  bCHAMB_PAYLOAD.clear();
+  bCHAMB_STATUS.clear();
+
   for(int err=0; err<nERRORS;   ++err) fCHAMB_ERR[err].clear();
   for(int wrn=0; wrn<nWARNINGS; ++wrn) fCHAMB_WRN[wrn].clear();
 
@@ -188,6 +227,10 @@ CSCDCCExaminer::CSCDCCExaminer(void):nERRORS(29),nWARNINGS(5),sERROR(nERRORS),sW
 
   dduBuffers.clear();
   dmbBuffers.clear();
+  dduOffsets.clear();
+  dmbOffsets.clear();
+  dduSize.clear();
+  dmbSize.clear();
 
   buf_1 = &(tmpbuf[0]);
   buf0  = &(tmpbuf[4]);
@@ -199,6 +242,9 @@ CSCDCCExaminer::CSCDCCExaminer(void):nERRORS(29),nWARNINGS(5),sERROR(nERRORS),sW
 
 long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
   if( length<=0 ) return -1;
+
+  // 'buffer' is a sliding pointer; keep track of the true buffer
+  buffer_start = buffer;
 
   while( length>0 ){
     // == Store last 4 read buffers in pipeline-like memory (note that memcpy works quite slower!)
@@ -264,6 +310,10 @@ long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
 
     dduBuffers.clear();
     dmbBuffers.clear();
+    dduOffsets.clear();
+    dmbOffsets.clear();
+    dduSize.clear();
+    dmbSize.clear();
 
     fDCC_Header  = true;
     bzero(fERROR,   sizeof(bool)*nERRORS);
@@ -273,6 +323,8 @@ long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
     for(int wrn=0; wrn<nWARNINGS; ++wrn) fCHAMB_WRN[wrn].clear();
     bCHAMB_ERR.clear();
     bCHAMB_WRN.clear();
+    bCHAMB_PAYLOAD.clear();
+    bCHAMB_STATUS.clear();
     bDDU_ERR.clear();
     bDDU_WRN.clear();
 	  }
@@ -286,6 +338,8 @@ long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
       bERROR    |= 0x1;
       fERROR[20] = true;
       bERROR    |= 0x100000;
+	  fCHAMB_ERR[20].insert(currentChamber);
+	  bCHAMB_ERR[currentChamber] |= 0x200000;
       cerr<<"\nDDU Header Occurrence = "<<cntDDU_Headers;
       cerr<<"  ERROR 20 "<<sERROR[20]<<endl;
     }
@@ -293,6 +347,79 @@ long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
     // == DDU Header found
     if( /*buf0[0]==0x8000 &&*/ buf0[1]==0x8000 && buf0[2]==0x0001 && buf0[3]==0x8000 ){
       // headerDAV_Active = (buf1[1]<<16) | buf1[0]; // Obsolete since 16.09.05
+/////////////////////////////////////////////////////////
+	if( DAV_ALCT ){
+	  fERROR[21] = true;
+	  bERROR   |= 0x200000;
+	  fCHAMB_ERR[21].insert(currentChamber);
+	  bCHAMB_ERR[currentChamber] |= 0x200000;
+	  DAV_ALCT = false;
+	}
+	if( DAV_TMB  ){
+	  fERROR[22] = true;
+	  bERROR   |= 0x400000;
+	  fCHAMB_ERR[22].insert(currentChamber);
+	  bCHAMB_ERR[currentChamber] |= 0x400000;
+	  DAV_TMB = false;
+	}
+	if( DAV_CFEB && DAV_CFEB!=-16){
+	  fERROR[23] = true;
+	  bERROR   |= 0x800000;
+	  fCHAMB_ERR[23].insert(currentChamber);
+	  bCHAMB_ERR[currentChamber] |= 0x800000;
+	  DAV_CFEB = 0;
+	}
+
+      if( !fALCT_Header && ( ALCT_WordsSinceLastHeader!=ALCT_WordCount || ALCT_WordsSinceLastHeader!=ALCT_WordsExpected ) ){
+	fERROR[9] = true;
+	bERROR   |= 0x200;
+	fCHAMB_ERR[9].insert(currentChamber);
+	bCHAMB_ERR[currentChamber] |= 0x200;
+	ALCT_WordsSinceLastHeader = 0;
+	ALCT_WordCount            = 0;
+	ALCT_WordsSinceLastHeader = 0;
+	ALCT_WordsExpected        = 0;
+      } // ALCT Word Count Error
+
+      if( !fTMB_Header && ( TMB_WordsSinceLastHeader!=TMB_WordCount || TMB_WordsSinceLastHeader!=TMB_WordsExpected ) ){
+	fERROR[14] = true;
+	bERROR    |= 0x4000;
+	fCHAMB_ERR[14].insert(currentChamber);
+	bCHAMB_ERR[currentChamber] |= 0x4000;
+	TMB_WordsSinceLastHeader = 0;
+	TMB_WordCount            = 0;
+	TMB_WordsSinceLastHeader = 0;
+	TMB_WordsExpected        = 0;
+      } // TMB Word Count Error
+
+      if( (CFEB_SampleCount%8)!=0 ){
+	fERROR[17] = true;
+	bERROR    |= 0x20000;
+	fCHAMB_ERR[17].insert(currentChamber);
+	bCHAMB_ERR[currentChamber] |= 0x20000;
+	CFEB_SampleCount = 0;
+      } // Number of CFEB samples != 8*n
+
+      if(fALCT_Header) {
+	fERROR[7] = true;  // ALCT Trailer is missing
+	bERROR   |= 0x80;
+	fCHAMB_ERR[7].insert(currentChamber);
+	bCHAMB_ERR[currentChamber] |= 0x80;
+	ALCT_WordsSinceLastHeader = 0;
+	ALCT_WordsExpected        = 0;
+	fALCT_Header = 0;
+      }
+
+      if(fTMB_Header) {
+	fERROR[12]=true;	// TMB Trailer is missing
+	bERROR   |= 0x1000;
+	fCHAMB_ERR[12].insert(currentChamber);
+	bCHAMB_ERR[currentChamber] |= 0x1000;
+	TMB_WordsSinceLastHeader = 0;
+	TMB_WordsExpected        = 0;
+	fTMB_Header = false;
+      }
+/////////////////////////////////////////////////////////
 
       if( fDDU_Header ){
 	// == Another DDU Header before encountering DDU Trailer!
@@ -389,8 +516,6 @@ long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
       CFEB_SampleCount          = 0;
       CFEB_BSampleCount         = 0;
 
-      dduBuffers[sourceID] = buf_1;
-
       if (modeDDUonly) {
          fDCC_Header  = true;
          bzero(fERROR,   sizeof(bool)*nERRORS);
@@ -400,10 +525,26 @@ long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
          for(int wrn=0; wrn<nWARNINGS; ++wrn) fCHAMB_WRN[wrn].clear();
          bCHAMB_ERR.clear();
          bCHAMB_WRN.clear();
+         bCHAMB_PAYLOAD.clear();
+         bCHAMB_STATUS.clear();
          bDDU_ERR.clear();
          bDDU_WRN.clear();
+         dduBuffers.clear();
+         dduOffsets.clear();
+         dmbBuffers.clear();
+         dmbOffsets.clear();
+         dduSize.clear();
+         dmbSize.clear();
       }
-      bDDU_ERR[sourceID] = 0;
+
+	  dduBuffers[sourceID] = buf_1;
+      dduOffsets[sourceID] = buf_1-buffer_start;
+      dduSize   [sourceID] = 0;
+      dmbBuffers[sourceID].clear();
+      dmbOffsets[sourceID].clear();
+      dmbSize   [sourceID].clear();
+
+	  bDDU_ERR[sourceID] = 0;
       bDDU_WRN[sourceID] = 0;
 
       nDMBs      = 0;
@@ -418,10 +559,10 @@ long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
       }
 
       if( (buf_1[3]&0xF000)!=0x5000 ){
-        fWARNING[2]=true;
-        bWARNING|=0x4;
+        fWARNING[1]=true;
+        bWARNING|=0x2;
         cerr<<"\nDDU Header Occurrence = "<<cntDDU_Headers;
-		cerr<<"  WARNING 2 "<<sWARNING[2]<<". What must have been Header 1: 0x"<<std::hex<<buf_1[0]<<" 0x"<<buf_1[1]<<" 0x"<<buf_1[2]<<" 0x"<<buf_1[3]<<std::dec<<endl;
+		cerr<<"  WARNING 1 "<<sWARNING[1]<<". What must have been Header 1: 0x"<<std::hex<<buf_1[0]<<" 0x"<<buf_1[1]<<" 0x"<<buf_1[2]<<" 0x"<<buf_1[3]<<std::dec<<endl;
       }
 
       ++cntDDU_Headers;
@@ -432,6 +573,79 @@ long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
 
     // == DMB Header found
     if( (buf0[0]&0xF000)==0xA000 && (buf0[1]&0xF000)==0xA000 && (buf0[2]&0xF000)==0xA000 && (buf0[3]&0xF000)==0xA000 ){
+/////////////////////////////////////////////////////////
+	if( DAV_ALCT ){
+	  fERROR[21] = true;
+	  bERROR   |= 0x200000;
+	  fCHAMB_ERR[21].insert(currentChamber);
+	  bCHAMB_ERR[currentChamber] |= 0x200000;
+	  DAV_ALCT = false;
+	}
+	if( DAV_TMB  ){
+	  fERROR[22] = true;
+	  bERROR   |= 0x400000;
+	  fCHAMB_ERR[22].insert(currentChamber);
+	  bCHAMB_ERR[currentChamber] |= 0x400000;
+	  DAV_TMB = false;
+	}
+	if( DAV_CFEB && DAV_CFEB!=-16){
+	  fERROR[23] = true;
+	  bERROR   |= 0x800000;
+	  fCHAMB_ERR[23].insert(currentChamber);
+	  bCHAMB_ERR[currentChamber] |= 0x800000;
+	  DAV_CFEB = 0;
+	}
+
+      if( !fALCT_Header && ( ALCT_WordsSinceLastHeader!=ALCT_WordCount || ALCT_WordsSinceLastHeader!=ALCT_WordsExpected ) ){
+	fERROR[9] = true;
+	bERROR   |= 0x200;
+	fCHAMB_ERR[9].insert(currentChamber);
+	bCHAMB_ERR[currentChamber] |= 0x200;
+	ALCT_WordsSinceLastHeader = 0;
+	ALCT_WordCount            = 0;
+	ALCT_WordsSinceLastHeader = 0;
+	ALCT_WordsExpected        = 0;
+      } // ALCT Word Count Error
+
+      if( !fTMB_Header && ( TMB_WordsSinceLastHeader!=TMB_WordCount || TMB_WordsSinceLastHeader!=TMB_WordsExpected ) ){
+	fERROR[14] = true;
+	bERROR    |= 0x4000;
+	fCHAMB_ERR[14].insert(currentChamber);
+	bCHAMB_ERR[currentChamber] |= 0x4000;
+	TMB_WordsSinceLastHeader = 0;
+	TMB_WordCount            = 0;
+	TMB_WordsSinceLastHeader = 0;
+	TMB_WordsExpected        = 0;
+      } // TMB Word Count Error
+
+      if( (CFEB_SampleCount%8)!=0 ){
+	fERROR[17] = true;
+	bERROR    |= 0x20000;
+	fCHAMB_ERR[17].insert(currentChamber);
+	bCHAMB_ERR[currentChamber] |= 0x20000;
+	CFEB_SampleCount = 0;
+      } // Number of CFEB samples != 8*n
+
+      if(fALCT_Header) {
+	fERROR[7] = true;  // ALCT Trailer is missing
+	bERROR   |= 0x80;
+	fCHAMB_ERR[7].insert(currentChamber);
+	bCHAMB_ERR[currentChamber] |= 0x80;
+	ALCT_WordsSinceLastHeader = 0;
+	ALCT_WordsExpected        = 0;
+	fALCT_Header = 0;
+      }
+
+      if(fTMB_Header) {
+	fERROR[12]=true;	// TMB Trailer is missing
+	bERROR   |= 0x1000;
+	fCHAMB_ERR[12].insert(currentChamber);
+	bCHAMB_ERR[currentChamber] |= 0x1000;
+	TMB_WordsSinceLastHeader = 0;
+	TMB_WordsExpected        = 0;
+	fTMB_Header = false;
+      }
+/////////////////////////////////////////////////////////
 
       if( DDU_WordsSinceLastHeader>3 && !fDMB_Header && !fDMB_Trailer && !nDMBs ){
         fERROR[28]=true;
@@ -457,10 +671,11 @@ long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
 	  fCHAMB_ERR[err].erase(-1);
 	  fCHAMB_ERR[err].insert(-2);
 	}
-      if( fCHAMB_WRN[1].find(-1) != fCHAMB_WRN[1].end() ){
-	fCHAMB_WRN[1].erase(-1);
-	fCHAMB_WRN[1].insert(-2);
-      }
+// Two lines below are commented out because payloads never get filled if 0xA header is missing
+//      bCHAMB_PAYLOAD[-2] |= bCHAMB_PAYLOAD[-1];
+//      fCHAMB_PAYLOAD[-1] = 0;
+      bCHAMB_STATUS[-2] |= bCHAMB_STATUS[-1];
+      bCHAMB_STATUS[-1] = 0;
       bCHAMB_ERR[-2] |= bCHAMB_ERR[-1];
       bCHAMB_ERR[-1] = 0;
       bCHAMB_WRN[-2] |= bCHAMB_WRN[-1];
@@ -491,7 +706,9 @@ long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
 
       nDMBs++;
 
-      dmbBuffers[sourceID][currentChamber] = buf0;
+      dmbBuffers[sourceID][currentChamber] = buf0-4;
+      dmbOffsets[sourceID][currentChamber] = buf0-4-buffer_start;
+      dmbSize   [sourceID][currentChamber] = 4;
 
       // Print DMB_ID from DMB Header
       cout<<"DMB="<<setw(2)<<setfill('0')<<(buf0[1]&0x000F)<<" ";
@@ -512,6 +729,11 @@ long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
       if( buf0[0]&0x0004 ) ++DAV_CFEB;
       if( buf0[0]&0x0008 ) ++DAV_CFEB;
       if( buf0[0]&0x0010 ) ++DAV_CFEB;
+      if( DAV_ALCT ) bCHAMB_PAYLOAD[currentChamber] |= 0x20;
+      if( DAV_TMB  ) bCHAMB_PAYLOAD[currentChamber] |= 0x40;
+      bCHAMB_PAYLOAD[currentChamber] |= (buf0[0]&0x001f)<<7;
+      bCHAMB_PAYLOAD[currentChamber] |=((buf_1[2]>>5)&0x001f);
+	  bCHAMB_STATUS [currentChamber] |= (buf0[0]&0x0040)<<16;
     }
 
 
@@ -773,7 +995,7 @@ long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
     if( fTMB_Header && checkCrcTMB ){
       for(unsigned short j=0, w=0; j<4; ++j){
 	///w = buf0[j] & 0x7fff;
-	w = buf0[j] & (fALCT_Format2007 ? 0xffff : 0x7fff);
+	w = buf0[j] & (fTMB_Format2007 ? 0xffff : 0x7fff);
 	for(unsigned long i=15, t=0, ncrc=0; i<16; i--){
 	  t = ((w >> i) & 1) ^ ((TMB_CRC >> 21) & 1);
 	  ncrc = (TMB_CRC << 1) & 0x3ffffc;
@@ -786,10 +1008,14 @@ long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
 
 
     // == CFEB Sample Trailer found
-	if( (buf0[1]&0xF000)==0x7000 && (buf0[2]&0xF000)==0x7000 && (
-		(buf0[3]&0xFFFF)==0x7FFF ||   // old format
-		( (buf0[3]&buf0[0])==0x0000 && (buf0[3]|buf0[0])==0x7FFF ) // 2007 format
-		) ){
+
+	if( ((buf0[1]&0xF000)==0x7000) &&
+                ((buf0[2]&0xF000)==0x7000) &&
+                ((buf0[1]!=0x7FFF) || (buf0[2]!=0x7FFF)) &&
+                ( ((buf0[3]&0xFFFF)==0x7FFF) ||   // old format
+              ( (buf0[3]&buf0[0])==0x0000 && (buf0[3]+buf0[0])==0x7FFF ) // 2007 format
+              ) ){
+
       if((CFEB_SampleCount%8)  == 0   ){ cout<<" <"; }
       if( CFEB_SampleWordCount == 100 ){ cout<<"+";  }
       if( CFEB_SampleWordCount != 100 ){ cout<<"-";
@@ -834,10 +1060,8 @@ long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
 
     // == CFEB B-word found
     if( (buf0[0]&0xF000)==0xB000 && (buf0[1]&0xF000)==0xB000 && (buf0[2]&0xF000)==0xB000 && (buf0[3]&0xF000)==0xB000 ){
-      fWARNING[1] = true;
-      bWARNING   |= 0x2;
-      fCHAMB_WRN[1].insert(currentChamber);
-      bCHAMB_WRN[currentChamber] |= 0x2;
+      bCHAMB_STATUS[currentChamber] |= 0x400000;
+
       if( (CFEB_SampleCount%8)==0 ){ cout<<" <"; }
       cout<<"B";
 
@@ -856,16 +1080,25 @@ long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
     // == DMB F-Trailer found
     if( (buf0[0]&0xF000)==0xF000 && (buf0[1]&0xF000)==0xF000 && (buf0[2]&0xF000)==0xF000 && (buf0[3]&0xF000)==0xF000 ){
       if(!fDMB_Header){
+    currentChamber = buf0[3]&0x0FFF;
 	fERROR[6] = true;
 	bERROR   |= 0x40;
 	fCHAMB_ERR[6].insert(currentChamber);
 	bCHAMB_ERR[currentChamber] |= 0x40;
     nDMBs++;
-      }	// DMB Header is missing
+      // Set variables if we are waiting ALCT, TMB and CFEB records to be present in event
+      if( buf0[0]&0x0400 ) bCHAMB_PAYLOAD[currentChamber] |= 0x20;
+      if( buf0[0]&0x0800 ) bCHAMB_PAYLOAD[currentChamber] |= 0x40;
+      bCHAMB_PAYLOAD[currentChamber] |= (buf0[0]&0x001f)<<7;
+      bCHAMB_PAYLOAD[currentChamber] |=((buf0[0]>>5)&0x1f);
+
+      } // DMB Header is missing
       fDMB_Header  = false;
       fDMB_Trailer = true;
       uniqueALCT   = true;
       uniqueTMB    = true;
+
+      dmbSize[sourceID][currentChamber] = buf0 - dmbBuffers[sourceID][currentChamber];
 
       // Finally check if DAVs were correct
       if( DAV_ALCT ){
@@ -873,18 +1106,21 @@ long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
 	bERROR   |= 0x200000;
 	fCHAMB_ERR[21].insert(currentChamber);
 	bCHAMB_ERR[currentChamber] |= 0x200000;
+	DAV_ALCT = false;
       }
       if( DAV_TMB  ){
 	fERROR[22] = true;
 	bERROR   |= 0x400000;
 	fCHAMB_ERR[22].insert(currentChamber);
 	bCHAMB_ERR[currentChamber] |= 0x400000;
+	DAV_TMB = false;
       }
       if( DAV_CFEB && DAV_CFEB!=-16 ){
 	fERROR[23] = true;
 	bERROR   |= 0x800000;
 	fCHAMB_ERR[23].insert(currentChamber);
 	bCHAMB_ERR[currentChamber] |= 0x800000;
+	DAV_CFEB = 0;
       }
 
       // If F-Trailer is lost then do necessary work here
@@ -900,8 +1136,6 @@ long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
 	  for(int err=0; err<nERRORS; err++)
 	  if( fCHAMB_ERR[err].find(-1) != fCHAMB_ERR[err].end() )
 	  fCHAMB_ERR[err].erase(-1);
-	  if( fCHAMB_WRN[1].find(-1) != fCHAMB_WRN[1].end() )
-	  fCHAMB_WRN[1].erase(-1);
 	  bCHAMB_ERR[-1] = 0;
 	  bCHAMB_WRN[-1] = 0;
 	*/
@@ -915,6 +1149,17 @@ long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
     if( (buf0[0]&0xF000)==0xE000 && (buf0[1]&0xF000)==0xE000 && (buf0[2]&0xF000)==0xE000 && (buf0[3]&0xF000)==0xE000 ){
       if( !fDMB_Header && !fDMB_Trailer ) nDMBs++; // both DMB Header and DMB F-Trailer were missing
 
+      bCHAMB_STATUS[currentChamber] |= (buf0[0]&0x0800)>>11;
+      bCHAMB_STATUS[currentChamber] |= (buf0[0]&0x0400)>>9;
+      bCHAMB_STATUS[currentChamber] |= (buf0[0]&0x03E0)>>3;
+      if( fDMB_Trailer ){ // F-Trailer exists
+        bCHAMB_STATUS[currentChamber] |= (buf_1[2]&0x0002)<<6;
+        bCHAMB_STATUS[currentChamber] |= (buf_1[2]&0x0001)<<8;
+        bCHAMB_STATUS[currentChamber] |= (buf_1[3]&0x001f)<<9;
+        bCHAMB_STATUS[currentChamber] |= (buf_1[3]&0x0040)<<8;
+        bCHAMB_STATUS[currentChamber] |= (buf_1[3]&0x0020)<<10;
+		bCHAMB_STATUS[currentChamber] |= (buf_1[3]&0x0f80)<<9;
+      }
       fDMB_Header  = false;
 
       // If chamber id is unknown it is time to find it out
@@ -925,16 +1170,16 @@ long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
 	    fCHAMB_ERR[err].insert(currentChamber);
 	    fCHAMB_ERR[err].erase(-1);
 	  }
-	if( fCHAMB_WRN[1].find(-1) != fCHAMB_WRN[1].end() ){
-	  fCHAMB_WRN[1].insert(currentChamber);
-	  fCHAMB_WRN[1].erase(-1);
-	}
+    bCHAMB_STATUS[currentChamber] = bCHAMB_STATUS[-1];
+    bCHAMB_STATUS[-1] = 0;
 	bCHAMB_ERR[currentChamber] = bCHAMB_ERR[-1];
 	bCHAMB_ERR[-1] = 0;
 	bCHAMB_WRN[currentChamber] = bCHAMB_WRN[-1];
 	bCHAMB_WRN[-1] = 0;
       }
       ++cntCHAMB_Trailers[buf0[1]&0x0FFF];
+
+      dmbSize[sourceID][currentChamber] = buf0 - dmbBuffers[sourceID][currentChamber];
 
       // Lost DMB F-Trailer before
       if( !fDMB_Trailer ){
@@ -950,18 +1195,21 @@ long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
 	  bERROR   |= 0x200000;
 	  fCHAMB_ERR[21].insert(currentChamber);
 	  bCHAMB_ERR[currentChamber] |= 0x200000;
+	  DAV_ALCT = false;
 	}
 	if( DAV_TMB  ){
 	  fERROR[22] = true;
 	  bERROR   |= 0x400000;
 	  fCHAMB_ERR[22].insert(currentChamber);
 	  bCHAMB_ERR[currentChamber] |= 0x400000;
+	  DAV_TMB = false;
 	}
 	if( DAV_CFEB && DAV_CFEB!=-16){
 	  fERROR[23] = true;
 	  bERROR   |= 0x800000;
 	  fCHAMB_ERR[23].insert(currentChamber);
 	  bCHAMB_ERR[currentChamber] |= 0x800000;
+	  DAV_CFEB = 0;
 	}
       }
       fDMB_Trailer = false;
@@ -971,6 +1219,10 @@ long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
 	bERROR   |= 0x200;
 	fCHAMB_ERR[9].insert(currentChamber);
 	bCHAMB_ERR[currentChamber] |= 0x200;
+	ALCT_WordsSinceLastHeader = 0;
+	ALCT_WordCount            = 0;
+	ALCT_WordsSinceLastHeader = 0;
+	ALCT_WordsExpected        = 0;
       } // ALCT Word Count Error
 
       if( !fTMB_Header && ( TMB_WordsSinceLastHeader!=TMB_WordCount || TMB_WordsSinceLastHeader!=TMB_WordsExpected ) ){
@@ -978,6 +1230,10 @@ long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
 	bERROR    |= 0x4000;
 	fCHAMB_ERR[14].insert(currentChamber);
 	bCHAMB_ERR[currentChamber] |= 0x4000;
+	TMB_WordsSinceLastHeader = 0;
+	TMB_WordCount            = 0;
+	TMB_WordsSinceLastHeader = 0;
+	TMB_WordsExpected        = 0;
       } // TMB Word Count Error
 
       if( (CFEB_SampleCount%8)!=0 ){
@@ -985,6 +1241,7 @@ long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
 	bERROR    |= 0x20000;
 	fCHAMB_ERR[17].insert(currentChamber);
 	bCHAMB_ERR[currentChamber] |= 0x20000;
+	CFEB_SampleCount = 0;
       } // Number of CFEB samples != 8*n
 
       if(fALCT_Header) {
@@ -994,6 +1251,7 @@ long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
 	bCHAMB_ERR[currentChamber] |= 0x80;
 	ALCT_WordsSinceLastHeader = 0;
 	ALCT_WordsExpected        = 0;
+	fALCT_Header = 0;
       }
 
       if(fTMB_Header) {
@@ -1003,6 +1261,7 @@ long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
 	bCHAMB_ERR[currentChamber] |= 0x1000;
 	TMB_WordsSinceLastHeader = 0;
 	TMB_WordsExpected        = 0;
+	fTMB_Header = false;
       }
 
       //
@@ -1011,10 +1270,8 @@ long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
 	  fCHAMB_ERR[err].erase(-1);
 	  fCHAMB_ERR[err].insert(-2);
 	}
-      if( fCHAMB_WRN[1].find(-1) != fCHAMB_WRN[1].end() ){
-	fCHAMB_WRN[1].erase(-1);
-	fCHAMB_WRN[1].insert(-2);
-      }
+      bCHAMB_STATUS[-2] |= bCHAMB_STATUS[-1];
+      bCHAMB_STATUS[-1] = 0;
       bCHAMB_ERR[-2] |= bCHAMB_ERR[-1];
       bCHAMB_ERR[-1] = 0;
       bCHAMB_WRN[-2] |= bCHAMB_WRN[-1];
@@ -1052,6 +1309,79 @@ long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
       //				//cerr<<"  ERROR 21   "<<sERROR[21]<<endl;
       //			}
       //			headerDAV_Active = -1;
+/////////////////////////////////////////////////////////
+	if( DAV_ALCT ){
+	  fERROR[21] = true;
+	  bERROR   |= 0x200000;
+	  fCHAMB_ERR[21].insert(currentChamber);
+	  bCHAMB_ERR[currentChamber] |= 0x200000;
+	  DAV_ALCT = false;
+	}
+	if( DAV_TMB  ){
+	  fERROR[22] = true;
+	  bERROR   |= 0x400000;
+	  fCHAMB_ERR[22].insert(currentChamber);
+	  bCHAMB_ERR[currentChamber] |= 0x400000;
+	  DAV_TMB = false;
+	}
+	if( DAV_CFEB && DAV_CFEB!=-16){
+	  fERROR[23] = true;
+	  bERROR   |= 0x800000;
+	  fCHAMB_ERR[23].insert(currentChamber);
+	  bCHAMB_ERR[currentChamber] |= 0x800000;
+	  DAV_CFEB = 0;
+	}
+
+      if( !fALCT_Header && ( ALCT_WordsSinceLastHeader!=ALCT_WordCount || ALCT_WordsSinceLastHeader!=ALCT_WordsExpected ) ){
+	fERROR[9] = true;
+	bERROR   |= 0x200;
+	fCHAMB_ERR[9].insert(currentChamber);
+	bCHAMB_ERR[currentChamber] |= 0x200;
+	ALCT_WordsSinceLastHeader = 0;
+	ALCT_WordCount            = 0;
+	ALCT_WordsSinceLastHeader = 0;
+	ALCT_WordsExpected        = 0;
+      } // ALCT Word Count Error
+
+      if( !fTMB_Header && ( TMB_WordsSinceLastHeader!=TMB_WordCount || TMB_WordsSinceLastHeader!=TMB_WordsExpected ) ){
+	fERROR[14] = true;
+	bERROR    |= 0x4000;
+	fCHAMB_ERR[14].insert(currentChamber);
+	bCHAMB_ERR[currentChamber] |= 0x4000;
+	TMB_WordsSinceLastHeader = 0;
+	TMB_WordCount            = 0;
+	TMB_WordsSinceLastHeader = 0;
+	TMB_WordsExpected        = 0;
+      } // TMB Word Count Error
+
+      if( (CFEB_SampleCount%8)!=0 ){
+	fERROR[17] = true;
+	bERROR    |= 0x20000;
+	fCHAMB_ERR[17].insert(currentChamber);
+	bCHAMB_ERR[currentChamber] |= 0x20000;
+	CFEB_SampleCount = 0;
+      } // Number of CFEB samples != 8*n
+
+      if(fALCT_Header) {
+	fERROR[7] = true;  // ALCT Trailer is missing
+	bERROR   |= 0x80;
+	fCHAMB_ERR[7].insert(currentChamber);
+	bCHAMB_ERR[currentChamber] |= 0x80;
+	ALCT_WordsSinceLastHeader = 0;
+	ALCT_WordsExpected        = 0;
+	fALCT_Header = 0;
+      }
+
+      if(fTMB_Header) {
+	fERROR[12]=true;	// TMB Trailer is missing
+	bERROR   |= 0x1000;
+	fCHAMB_ERR[12].insert(currentChamber);
+	bCHAMB_ERR[currentChamber] |= 0x1000;
+	TMB_WordsSinceLastHeader = 0;
+	TMB_WordsExpected        = 0;
+	fTMB_Header = false;
+      }
+/////////////////////////////////////////////////////////
 
       if( DDU_WordsSinceLastHeader>3 && !nDMBs ){
         fERROR[28]=true;
@@ -1083,10 +1413,8 @@ long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
 	  fCHAMB_ERR[err].erase(-1);
 	  fCHAMB_ERR[err].insert(-2);
 	}
-      if( fCHAMB_WRN[1].find(-1) != fCHAMB_WRN[1].end() ){
-	fCHAMB_WRN[1].erase(-1);
-	fCHAMB_WRN[1].insert(-2);
-      }
+      bCHAMB_STATUS[-2] |= bCHAMB_STATUS[-1];
+      bCHAMB_STATUS[-1] = 0;
       bCHAMB_ERR[-2] |= bCHAMB_ERR[-1];
       bCHAMB_ERR[-1] = 0;
       bCHAMB_WRN[-2] |= bCHAMB_WRN[-1];
@@ -1098,6 +1426,7 @@ long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
 	  bCHAMB_ERR[-2] |= 0x1;
 	}
 
+      dduSize[sourceID] = buf0-dduBuffers[sourceID];
 
       ++cntDDU_Trailers; // Increment DDUTrailer counter
 

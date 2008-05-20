@@ -8,10 +8,10 @@
 
 class CSCDCCExaminer {
 public:
-	const unsigned short nERRORS, nWARNINGS;
+	const unsigned short nERRORS, nWARNINGS, nPAYLOADS, nSTATUSES;
 
 private:
-	std::vector<char*> sERROR,  sWARNING, sERROR_,  sWARNING_;
+	std::vector<char*> sERROR,  sWARNING, sERROR_,  sWARNING_, sDMBExpectedPayload, sDMBEventStaus;
 	long               bERROR,  bWARNING;
 	bool               fERROR  [29];//[nERRORS];
 	bool               fWARNING[5]; //[nWARNINGS];
@@ -20,6 +20,8 @@ private:
 	std::set<int>      fCHAMB_WRN[5];  // Set of chambers which contain particular warning
 	std::map<int,long> bCHAMB_ERR;     // chamber <=> errors in bits
 	std::map<int,long> bCHAMB_WRN;     // chamber <=> errors in bits
+	std::map<int,long> bCHAMB_PAYLOAD; //
+	std::map<int,long> bCHAMB_STATUS;  //
 	std::map<int,long> bDDU_ERR;       // ddu     <-> errors in bits
 	std::map<int,long> bDDU_WRN;       // ddu     <-> errors in bits
 
@@ -109,20 +111,29 @@ private:
 	bool checkCrcCFEB;
 	unsigned long CFEB_CRC;
 
-        bool  modeDDUonly;
+	bool  modeDDUonly;
 	short sourceID;
+	unsigned long examinerMask;
 
 	//int headerDAV_Active; // Obsolete since 16.09.05
 
 	// data blocks:
 	std::map<short,const unsigned short*>                  dduBuffers; // < DDUsourceID, pointer >
 	std::map<short,std::map<short,const unsigned short*> > dmbBuffers; // < DDUsourceID, < DMBid, pointer > >
+	std::map<short,unsigned long>                  dduOffsets; // < DDUsourceID, pointer_offset >
+	std::map<short,std::map<short,unsigned long> > dmbOffsets; // < DDUsourceID, < DMBid, pointer_offset > >
+	std::map<short,unsigned long>                  dduSize; // < DDUsourceID, block_size >
+	std::map<short,std::map<short,unsigned long> > dmbSize; // < DDUsourceID, < DMBid, block_size > >
+	const unsigned short *buffer_start;
 
 public:
 	OStream& output1(void){ return cout; }
 	OStream& output2(void){ return cerr; }
 
 	long check(const unsigned short* &buffer, long length);
+
+	void setMask(unsigned long mask) {examinerMask=mask;}
+        unsigned long getMask() const {return examinerMask;}
 
 	long errors  (void) const { return bERROR;   }
 	long warnings(void) const { return bWARNING; }
@@ -133,11 +144,24 @@ public:
 	const char* errorName  (int num) const { if(num>=0&&num<nERRORS)   return sERROR_[num];   else return ""; }
 	const char* warningName(int num) const { if(num>=0&&num<nWARNINGS) return sWARNING_[num]; else return ""; }
 
+	const char* payloadName(int num) const { if(num>=0&&num<nPAYLOADS) return sDMBExpectedPayload[num]; else return ""; }
+	const char* statusName (int num) const { if(num>=0&&num<nSTATUSES) return sDMBEventStaus     [num]; else return ""; }
+
 	bool error  (int num) const { if(num>=0&&num<nERRORS)   return fERROR  [num]; else return 0; }
 	bool warning(int num) const { if(num>=0&&num<nWARNINGS) return fWARNING[num]; else return 0; }
 
 	std::set<int> chambersWithError  (int num) const { if(num>=0&&num<nERRORS)   return fCHAMB_ERR[num]; else return std::set<int>(); }
 	std::set<int> chambersWithWarning(int num) const { if(num>=0&&num<nWARNINGS) return fCHAMB_WRN[num]; else return std::set<int>(); }
+
+	long payloadForChamber(int chamber) const {
+		std::map<int,long>::const_iterator item = bCHAMB_PAYLOAD.find(chamber);
+		if( item != bCHAMB_PAYLOAD.end() ) return item->second; else return 0;
+	}
+
+	long statusForChamber(int chamber) const {
+		std::map<int,long>::const_iterator item = bCHAMB_STATUS.find(chamber);
+		if( item != bCHAMB_STATUS.end() ) return item->second; else return 0;
+	}
 
 	long errorsForChamber(int chamber) const {
 		std::map<int,long>::const_iterator item = bCHAMB_ERR.find(chamber);
@@ -166,6 +190,8 @@ public:
 
 	std::map<int,long> errorsDetailed  (void) const { return bCHAMB_ERR; }
 	std::map<int,long> warningsDetailed(void) const { return bCHAMB_WRN; }
+	std::map<int,long> payloadDetailed (void) const { return bCHAMB_PAYLOAD; }
+	std::map<int,long> statusDetailed  (void) const { return bCHAMB_STATUS; }
 
 	void crcALCT(bool enable);
 	void crcTMB (bool enable);
@@ -178,7 +204,13 @@ public:
 	std::map<short,const unsigned short*>                  DDU_block(void) const { return dduBuffers; }
 	std::map<short,std::map<short,const unsigned short*> > DMB_block(void) const { return dmbBuffers; }
 
-	CSCDCCExaminer(void);
+	std::map<short,unsigned long>                  DDU_ptrOffsets(void) const { return dduOffsets; }
+	std::map<short,std::map<short,unsigned long> > DMB_ptrOffsets(void) const { return dmbOffsets; }
+
+	std::map<short,unsigned long>                  DDU_size(void) const { return dduSize; }
+	std::map<short,std::map<short,unsigned long> > DMB_size(void) const { return dmbSize; }
+
+	CSCDCCExaminer(unsigned long mask=0x1); 
 	~CSCDCCExaminer(void){}
 };
 
