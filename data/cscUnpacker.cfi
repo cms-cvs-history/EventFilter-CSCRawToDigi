@@ -22,4 +22,7 @@ module muonCSCDigis   = CSCDCCUnpacker {
 
 		        #set this to true if unpacking MTCC data from summer-fall MTCC2006 
                         untracked bool isMTCCData = false
+			
+			# Use CSC examiner to selectively unpack good chambers and skip only bad ones
+			untracked bool UseSelectiveUnpacking = false
 }
