@@ -1,8 +1,0 @@
-# This is a generic cfi file for CSC Digi to Raw packing
-# tumanov@rice.edu 3/16/07
-
-module cscpacker = CSCDigiToRawModule {
-  InputTag stripDigiTag = simMuonCSCDigis:MuonCSCStripDigi
-  InputTag wireDigiTag  = simMuonCSCDigis:MuonCSCWireDigi
-}
-
