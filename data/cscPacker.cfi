@@ -2,7 +2,13 @@
 # tumanov@rice.edu 3/16/07
 
 module cscpacker = CSCDigiToRawModule {
-  InputTag stripDigiTag = simMuonCSCDigis:MuonCSCStripDigi
-  InputTag wireDigiTag  = simMuonCSCDigis:MuonCSCWireDigi
+  InputTag stripDigiTag = muonCSCDigis:MuonCSCStripDigi
+  InputTag wireDigiTag  = muonCSCDigis:MuonCSCWireDigi
+  InputTag comparatorDigiTag = muonCSCDigis:MuonCSCComparatorDigi
+  InputTag alctDigiTag = cscTriggerPrimitiveDigis
+  InputTag clctDigiTag = cscTriggerPrimitiveDigis
+  InputTag correlatedLCTDigiTag = cscTriggerPrimitiveDigis:MPCSORTED
+
+
 }
 
