@@ -24,5 +24,5 @@ module muonCSCDigis   = CSCDCCUnpacker {
                         untracked bool isMTCCData = false
 			
 			# Use CSC examiner to selectively unpack good chambers and skip only bad ones
-			untracked bool UseSelectiveUnpacking = false
+			untracked bool UseSelectiveUnpacking = true
 }
