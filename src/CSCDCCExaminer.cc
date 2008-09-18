@@ -165,8 +165,8 @@ CSCDCCExaminer::CSCDCCExaminer(unsigned long mask):nERRORS(29),nWARNINGS(5),nPAY
   fDMB_Trailer = false;
   fALCT_Header = false;
   fTMB_Header  = false;
-  fALCT_Format2007 = false;
-  fTMB_Format2007  = false;
+  fALCT_Format2007 = true;
+  fTMB_Format2007  = true;
 
   cntDDU_Headers  = 0;
   cntDDU_Trailers = 0;
@@ -500,9 +500,9 @@ long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
       fDMB_Header   = false;
       fDMB_Trailer  = false;
       fALCT_Header  = false;
-      fALCT_Format2007= false;
+      fALCT_Format2007= true;
       fTMB_Header   = false;
-      fTMB_Format2007= false;
+      fTMB_Format2007= true;
       uniqueALCT    = true;
       uniqueTMB     = true;
       ALCT_WordsSinceLastHeader = 0;
@@ -687,9 +687,9 @@ long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
       bCHAMB_ERR[currentChamber] |= 0; //Victor's line
 
       fALCT_Header = false;
-      fALCT_Format2007= false;
+      fALCT_Format2007= true;
       fTMB_Header  = false;
-      fTMB_Format2007= false;
+      fTMB_Format2007= true;
       uniqueALCT   = true;
       uniqueTMB    = true;
       ALCT_WordsSinceLastHeader = 0;
@@ -931,12 +931,14 @@ long CSCDCCExaminer::check(const unsigned short* &buffer, long length){
 	//				((buf_1[2]&0x0800)>>11) * ((buf_1[2]&0x0700)>>8) * TMB_Tbins * 2;  // RPC raw hits
                 ( fTMB_Format2007 ?
                 ((buf_1[0]&0x0040)>>6) * ((buf_1[0]&0x0030)>>4) * TMB_Tbins * 2 :   // RPC raw hits
+		// ((buf_1[0]&0x0010)>>4) * ((buf_1[0]&0x000c)>>2) * TMB_Tbins * 2 :   // =VB= RPC raw hits TMB2007 rev0x50c3
                 ((buf_1[2]&0x0040)>>6) * ((buf_1[2]&0x0030)>>4) * TMB_Tbins * 2 );  // RPC raw hits
     }
 
     // == TMB Trailer found
+    // =VB= now assume that TMB and ALCT format is 2007 by default 
     if(
-       // Old TMB data format; last condition in needed not to confuse if with new ALCT data header
+       // Old TMB data format; last condition is needed not to confuse if with new ALCT data header
        ((buf0[0]&0xF000)==0xD000 && (buf0[1]&0xF000)==0xD000 && (buf0[2]&0xFFFF)==0xDE0F && (buf0[3]&0xF000)==0xD000 && !fTMB_Format2007 && !(fALCT_Header&&fALCT_Format2007)) ||
        // New TMB data format
        ( buf0[0]==        0xDE0F && (buf0[1]&0xF000)==0xD000 && (buf0[2]&0xF000)==0xD000 && (buf0[3]&0xF000)==0xD000 &&  fTMB_Format2007 )
