@@ -24,7 +24,6 @@ class CSCTMBData {
   CSCTMBData();
   ~CSCTMBData();
   CSCTMBData(unsigned short *buf);
-  CSCTMBData(const CSCTMBData& data);
   int UnpackTMB(unsigned short *buf);
   /// sees if the size adds up to the word count
   bool checkSize() const;
