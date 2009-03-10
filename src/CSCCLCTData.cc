@@ -1,4 +1,5 @@
 #include "EventFilter/CSCRawToDigi/interface/CSCCLCTData.h"
+#include "EventFilter/CSCRawToDigi/interface/CSCTMBHeader.h"
 #include "DataFormats/MuonDetId/interface/CSCDetId.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include <iostream>
@@ -7,24 +8,22 @@
 bool CSCCLCTData::debug = false;
 
 
+CSCCLCTData::CSCCLCTData(const CSCTMBHeader * tmbHeader)
+: ncfebs_(tmbHeader->NCFEBs()), ntbins_(tmbHeader->NTBins())
+{
+  size_ = nlines();
+  zero();
+}
+
+
 CSCCLCTData::CSCCLCTData(int ncfebs, int ntbins)
 : ncfebs_(ncfebs), ntbins_(ntbins) 
 {
   size_ = nlines();
-  
-  // initialize the words
-  for(int ifeb = 0; ifeb < ncfebs_; ++ifeb) 
-    {
-      for(int tbin = 0; tbin < ntbins_; ++tbin)
-	{
-	  for(int layer = 1; layer <= 6; ++layer) 
-	    {
-	      dataWord(ifeb, tbin, layer) = CSCCLCTDataWord(ifeb, tbin, 0);
-	    }
-	}
-    }
+  zero();
 }
      
+
 
 
 CSCCLCTData::CSCCLCTData(int ncfebs, int ntbins, const unsigned short * buf)
@@ -37,6 +36,23 @@ CSCCLCTData::CSCCLCTData(int ncfebs, int ntbins, const unsigned short * buf)
   memcpy(theData, buf, size_*2);
   
 }
+
+
+void CSCCLCTData::zero()
+{
+  for(int ifeb = 0; ifeb < ncfebs_; ++ifeb)
+    {
+      for(int tbin = 0; tbin < ntbins_; ++tbin)
+        {
+          for(int layer = 1; layer <= 6; ++layer)
+            {
+              dataWord(ifeb, tbin, layer) = CSCCLCTDataWord(ifeb, tbin, 0);
+            }
+        }
+    }
+
+}
+
 
 std::vector<CSCComparatorDigi>  CSCCLCTData::comparatorDigis(uint32_t idlayer, unsigned cfeb) 
 {
@@ -84,13 +100,13 @@ std::vector<CSCComparatorDigi>  CSCCLCTData::comparatorDigis(uint32_t idlayer, u
 	       *
 	       */
 
-	      if (debug)
-		LogTrace ("CSCCLCTData|CSCRawToDigi")
-		  << "fillComparatorOutputs: layer = "
+	if (debug)
+          LogTrace ("CSCCLCTData|CSCRawToDigi")
+                  << "fillComparatorOutputs: layer = "
 		  << layer << " timebin = " << tbin
 		  << " cfeb = " << cfeb << " distrip = " << chamberDistrip
 		  << " HalfStrip = " << HalfStrip
-		  << " Output " << output;
+		  << " Output " << output << std::endl;
 	      ///what is actually stored in comparator digis are 0/1 for left/right halfstrip for each strip
 
 	      ///constructing four bitted words for tbits on
@@ -142,7 +158,6 @@ std::vector<CSCComparatorDigi>  CSCCLCTData::comparatorDigis(uint32_t idlayer, u
 	//uh oh ugly ugly ugly!
       }
     }//end of loop over distrips
-  
   return result;
 }
 
