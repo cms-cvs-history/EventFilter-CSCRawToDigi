@@ -88,8 +88,6 @@ void CSCCFEBData::add(const CSCStripDigi & digi, int layer)
       const CSCCFEBTimeSlice * slice = timeSlice(itime);
       assert(slice != 0);
       slice->timeSample(layer, channel)->adcCounts = value;
-      /// =VB= Set CRC value for simulated data
-      ((CSCCFEBTimeSlice *)slice)->setCRC();
     }
 }
 

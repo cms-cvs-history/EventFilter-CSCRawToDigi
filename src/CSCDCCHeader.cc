@@ -4,12 +4,11 @@
 #include <cassert>
 #include <cstring>
 
-CSCDCCHeader::CSCDCCHeader(int bx, int l1a, int sourceId, int version)
+CSCDCCHeader::CSCDCCHeader(int bx, int l1a, int sourceId)
 {
   word[0] = 0x5100000000000008LL;
   word[1] = 0xD900000000000000LL;
-  /// =VB= Should pass true as last parameter for FEDHeader::set() method to construct correct data
-  FEDHeader::set(reinterpret_cast<unsigned char *>(data()), 1, l1a, bx, sourceId, version, true);
+  FEDHeader::set(reinterpret_cast<unsigned char *>(data()), 1, l1a, bx, sourceId);
 }
 
 
