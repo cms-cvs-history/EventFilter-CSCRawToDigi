@@ -1,7 +1,6 @@
 #ifndef CSCAnodeData2006_h
 #define CSCAnodeData2006_h
 #include "EventFilter/CSCRawToDigi/interface/CSCAnodeDataFormat.h"
-#include "DataFormats/CSCDigi/interface/CSCALCTDigi.h"
 #include <cassert>
 class CSCALCTHeader;
 
@@ -75,8 +74,6 @@ private:
   /// in 2007 format the max number of frames is 1860
   int nAFEBs_;
   int nTimeBins_;
-  std::vector<CSCALCTDigi> theALCTDigis; /// To account BX in wire digis
-  std::vector<int> alctBX_; /// To account BX in wire digis
 };
 
 #endif
